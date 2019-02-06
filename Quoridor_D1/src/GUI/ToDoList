@@ -1,0 +1,13 @@
+To Do List - GUI
+
+Walls:
+1. MouseReleased: Alignment of the wall to its right place
+
+2. Valid wall movement:
+    intersects with other walls
+    was it the player's turn?
+    is there a path for both players to win?
+3. How to change the neighbors of the cells?
+
+Maybe have the Board a property in the wall class?? Maybe waste of memory?
+
