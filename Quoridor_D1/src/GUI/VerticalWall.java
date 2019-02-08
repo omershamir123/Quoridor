@@ -10,6 +10,7 @@ import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
+import javafx.util.Pair;
 import javax.swing.ImageIcon;
 
 /**
@@ -28,12 +29,21 @@ public class VerticalWall extends Wall
         this.setIcon(icon);
     }
     
-    
+    public boolean checkIntersections(int row, int col)
+    {
+        LogicBoard b = LogicBoard.getInstance();
+        // same intersection exists
+        if (b.VerticalIntersections.contains(new Pair(row+1, col)) || b.HorizontalIntersections.contains(new Pair(row+1, col)))
+            return true;
+        if (b.VerticalIntersections.contains(new Pair(row, col)) || b.VerticalIntersections.contains(new Pair(row+2, col)))
+            return true;
+        return false;
+    }
     
     @Override
     public void mouseReleased(MouseEvent e)
     {
-        if (this.isEnabled() == false)
+        if (this.placed)
             return;
         // Check if location is valid
         Point p = this.getLocation();
@@ -43,19 +53,19 @@ public class VerticalWall extends Wall
             return;
         }
         // Check whether the placed wall intersects with another placed wall
-        if (false )// || CHECKINTERSECTIONS() || CHECKPATHEXISTS())
+        int row = Math.round((float)p.y/60);
+        int col = Math.round((float)p.x/60);
+        if (checkIntersections(row, col))//|| CHECKPATHEXISTS())
         {
             this.setLocation(this.origin_X, this.origin_Y);
             LogicBoard.panel.info.setText("Unavailable space");
             return;
         }
         // Align the wall to its right place
-        int row = Math.round((float)p.y/60);
-        int col = Math.round((float)p.x/60);
         this.setLocation(col*60 -5, row*60 +5);
+        LogicBoard.getInstance().VerticalIntersections.add(new Pair<>(row+1, col));
         // The wall has been set in place
         this.placed = true;
-        this.setEnabled(false);
         // CHANGE NEIGHBORS OF CELLS
     }
 }

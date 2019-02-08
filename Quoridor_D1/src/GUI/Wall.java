@@ -85,7 +85,7 @@ public class Wall extends JButton implements MouseListener, MouseMotionListener
     @Override
     public void mouseDragged(MouseEvent e)
     {        
-        if (this.isEnabled() == false)
+        if (this.placed)
             return;
         Point   POld =  getLocation();
         int XNew , YNew;

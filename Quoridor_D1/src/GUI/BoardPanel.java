@@ -24,7 +24,6 @@ public class BoardPanel extends javax.swing.JPanel
 {
 
     public JLabel info;
-
     /**
      * Creates new form Board
      */

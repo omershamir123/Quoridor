@@ -13,6 +13,8 @@ import GUI.VerticalWall;
 import java.awt.Color;
 import java.awt.Font;
 import java.util.ArrayList;
+import java.util.HashSet;
+import javafx.util.Pair;
 import javax.swing.JLabel;
 
 /**
@@ -32,8 +34,12 @@ public class LogicBoard
     // An arraylist of the players in the current game
     public ArrayList<Player> players;
     public static BoardPanel panel;
-    // Singleton of board
-
+    // set of intesections covered by vertical walls on the board
+    public HashSet<Pair<Integer, Integer>> VerticalIntersections;
+    // set of intesections covered by horizontal walls on the board
+    public HashSet<Pair<Integer, Integer>> HorizontalIntersections;
+    
+    // singleton of board
     public static LogicBoard getInstance()
     {
         if (instance == null)
@@ -47,7 +53,8 @@ public class LogicBoard
     {
         this.BSize = 9;
         this.MaxWalls = 10;
-        
+        this.VerticalIntersections = new HashSet<>();
+        this.HorizontalIntersections = new HashSet<>();
         // setting up the walls for this game
         for (int i = 0; i < 2 * this.MaxWalls; i++)
         {
