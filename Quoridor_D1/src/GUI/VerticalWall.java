@@ -5,6 +5,7 @@
  */
 package GUI;
 
+import Logic.LogicBoard;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -32,16 +33,29 @@ public class VerticalWall extends Wall
     @Override
     public void mouseReleased(MouseEvent e)
     {
-        // TODO ---> alignment of wall to its right place
+        if (this.isEnabled() == false)
+            return;
+        // Check if location is valid
         Point p = this.getLocation();
-        if (!locationBetweenBoards(p.x) || !locationBetweenBoards(p.y))
+        if (!locationBetweenBoards(p.x) || !locationBetweenBoards(p.y) || p.x < 45)
         {
             this.setLocation(this.origin_X, this.origin_Y);
             return;
         }
-        System.out.println("Good");
-            
-        //System.out.println((X+x1)+" and "+(Y+y1));
-        //this.setLocation(X+x1, Y+y1);
+        // Check whether the placed wall intersects with another placed wall
+        if (false )// || CHECKINTERSECTIONS() || CHECKPATHEXISTS())
+        {
+            this.setLocation(this.origin_X, this.origin_Y);
+            LogicBoard.panel.info.setText("Unavailable space");
+            return;
+        }
+        // Align the wall to its right place
+        int row = Math.round((float)p.y/60);
+        int col = Math.round((float)p.x/60);
+        this.setLocation(col*60 -5, row*60 +5);
+        // The wall has been set in place
+        this.placed = true;
+        this.setEnabled(false);
+        // CHANGE NEIGHBORS OF CELLS
     }
 }

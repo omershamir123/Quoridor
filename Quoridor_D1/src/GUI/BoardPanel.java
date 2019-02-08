@@ -7,29 +7,40 @@ package GUI;
 
 import Logic.LogicBoard;
 import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.util.ArrayList;
 import javax.swing.JButton;
 import javax.swing.*;
+
 /**
  *
  * @author Omer
  */
-public  class BoardPanel extends javax.swing.JPanel
+public class BoardPanel extends javax.swing.JPanel
 {
-   
+
+    public JLabel info;
+
     /**
      * Creates new form Board
      */
     public BoardPanel()
     {
-         initComponents();
-         LogicBoard.getInstance().panel = this;
-         LogicBoard.getInstance().Init();
-         this.setBackground(new Color(128,49,49));
-      
+        initComponents();
+        this.info = new JLabel();
+        this.info.setSize(500, 30);
+        LogicBoard l = LogicBoard.getInstance();
+        l.panel = this;
+        l.Init();
+        this.setBackground(new Color(128, 49, 49));
+        this.info.setText("Welcome To Quoridor!!!");
+        this.info.setFont(new Font("Comic Sans", 1, 14));
+        this.info.setLocation(l.BSize * 60 + 15, 30);
+        this.add(this.info);
     }
 
     /**
@@ -50,12 +61,10 @@ public  class BoardPanel extends javax.swing.JPanel
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 300, Short.MAX_VALUE)
+            .addGap(0, 469, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
-    
-       
-   
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     // End of variables declaration//GEN-END:variables

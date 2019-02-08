@@ -11,14 +11,15 @@ package GUI;
  */
 public class Game extends javax.swing.JFrame
 {
-
+    private BoardPanel board;
     /**
-     * Creates new form Game
+     * Creates new form Game1
      */
     public Game()
     {
         initComponents();
-        this.setDefaultCloseOperation(EXIT_ON_CLOSE);
+        this.board = new BoardPanel();
+        this.add(this.board);
     }
 
     /**
@@ -31,7 +32,7 @@ public class Game extends javax.swing.JFrame
     private void initComponents()
     {
 
-        board1 = new GUI.BoardPanel();
+        boardPanel1 = new GUI.BoardPanel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -40,14 +41,14 @@ public class Game extends javax.swing.JFrame
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(board1, javax.swing.GroupLayout.PREFERRED_SIZE, 694, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+                .addComponent(boardPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 755, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(0, 18, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(board1, javax.swing.GroupLayout.PREFERRED_SIZE, 544, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 61, Short.MAX_VALUE))
+                .addComponent(boardPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 566, Short.MAX_VALUE)
+                .addContainerGap())
         );
 
         pack();
@@ -87,6 +88,7 @@ public class Game extends javax.swing.JFrame
             java.util.logging.Logger.getLogger(Game.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
+        //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable()
@@ -99,6 +101,6 @@ public class Game extends javax.swing.JFrame
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private GUI.BoardPanel board1;
+    private GUI.BoardPanel boardPanel1;
     // End of variables declaration//GEN-END:variables
 }

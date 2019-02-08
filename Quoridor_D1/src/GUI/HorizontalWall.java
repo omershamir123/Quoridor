@@ -5,6 +5,7 @@
  */
 package GUI;
 
+import Logic.LogicBoard;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -32,12 +33,23 @@ public class HorizontalWall extends Wall
     {
         // TODO ---> alignment of wall to its right place
         Point p = this.getLocation();
-        if (!locationBetweenBoards(p.x) || !locationBetweenBoards(p.y))
+        if (!locationBetweenBoards(p.x) || !locationBetweenBoards(p.y) || p.y < 45)
         {
             this.setLocation(this.origin_X, this.origin_Y);
+            LogicBoard.panel.info.setText("Wrong Placement");
             return;
         }
-        System.out.println("Good");
+        if (false )// || CHECKINTERSECTIONS() || CHECKPATHEXISTS())
+        {
+            this.setLocation(this.origin_X, this.origin_Y);
+            LogicBoard.panel.info.setText("Unavailable space");
+            return;
+        }
+        int row = Math.round((float)p.y/60);
+        int col = Math.round((float)p.x/60);
+        this.setLocation(col*60 + 5, row*60 - 5);
+        
+        
             
         //System.out.println((X+x1)+" and "+(Y+y1));
         //this.setLocation(X+x1, Y+y1);

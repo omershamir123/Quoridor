@@ -24,7 +24,7 @@ public class Wall extends JButton implements MouseListener, MouseMotionListener
 {
     private int x1, y1;                     // original internal coordinates of the dragged wall, within the wall
     public int origin_X, origin_Y;          // original coordinates of the wall in the panel
-    private boolean placed;                 // has the wall been placed already and set in place?
+    protected boolean placed;                 // has the wall been placed already and set in place?
     //private Cell
     
     
@@ -49,8 +49,7 @@ public class Wall extends JButton implements MouseListener, MouseMotionListener
         // Is the current coordinate between two cells
         if (coordinate % 60 < 45 && coordinate % 60 > 15)
             return false;
-        // Is the coordinate before the first row
-        if (coordinate < 45)
+        if (coordinate < 0)
             return false;
         // The coordinate is not in the board
         if (coordinate > (LogicBoard.getInstance().BSize - 1)*60 + 5)
@@ -65,7 +64,6 @@ public class Wall extends JButton implements MouseListener, MouseMotionListener
     public void mousePressed(MouseEvent e) {
         x1 = e.getX();
         y1 = e.getY();
-        System.out.println(x1+", "+y1);
     }
     
     @Override
@@ -87,6 +85,8 @@ public class Wall extends JButton implements MouseListener, MouseMotionListener
     @Override
     public void mouseDragged(MouseEvent e)
     {        
+        if (this.isEnabled() == false)
+            return;
         Point   POld =  getLocation();
         int XNew , YNew;
         if (e.getX() < x1)
