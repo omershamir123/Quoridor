@@ -33,9 +33,15 @@ public class VerticalWall extends Wall
     {
         LogicBoard b = LogicBoard.getInstance();
         // same intersection exists
-        if (b.VerticalIntersections.contains(new Pair(row+1, col)) || b.HorizontalIntersections.contains(new Pair(row+1, col)))
+        if (!b.VerticalIntersections.contains(new Pair(row+1, col)) || !b.HorizontalIntersections.contains(new Pair(row+1, col)))
             return true;
-        if (b.VerticalIntersections.contains(new Pair(row, col)) || b.VerticalIntersections.contains(new Pair(row+2, col)))
+         // intersection of the same wall type exists above the currently attempted intersection
+        // first make sure an intersection as such is even possible
+        if (row != 0 && col != 0 && !b.VerticalIntersections.contains(new Pair(row, col)))
+            return true;
+        // intersection of the same wall type exists below the currently attempted intersection
+        // first make sure an intersection as such is even possible
+        if (row < b.BSize-1 && row != 0 && !b.VerticalIntersections.contains(new Pair(row+2, col)))
             return true;
         return false;
     }
@@ -63,9 +69,11 @@ public class VerticalWall extends Wall
         }
         // Align the wall to its right place
         this.setLocation(col*60 -5, row*60 +5);
-        LogicBoard.getInstance().VerticalIntersections.add(new Pair<>(row+1, col));
+        LogicBoard.getInstance().VerticalIntersections.remove(new Pair<>(row+1, col));
         // The wall has been set in place
         this.placed = true;
+        this.origin_X = this.getX();
+        this.origin_Y = this.getY();
         // CHANGE NEIGHBORS OF CELLS
     }
 }

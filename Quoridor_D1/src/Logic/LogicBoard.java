@@ -34,9 +34,9 @@ public class LogicBoard
     // An arraylist of the players in the current game
     public ArrayList<Player> players;
     public static BoardPanel panel;
-    // set of intesections covered by vertical walls on the board
+    // set of intesections available for vertical walls on the board
     public HashSet<Pair<Integer, Integer>> VerticalIntersections;
-    // set of intesections covered by horizontal walls on the board
+    // set of intesections available for horizontal walls on the board
     public HashSet<Pair<Integer, Integer>> HorizontalIntersections;
     
     // singleton of board
@@ -53,8 +53,6 @@ public class LogicBoard
     {
         this.BSize = 9;
         this.MaxWalls = 10;
-        this.VerticalIntersections = new HashSet<>();
-        this.HorizontalIntersections = new HashSet<>();
         // setting up the walls for this game
         for (int i = 0; i < 2 * this.MaxWalls; i++)
         {
@@ -69,6 +67,7 @@ public class LogicBoard
             panel.add(hw);
         }
         setCells();
+        setIntersections();
     }
 
     private void setCells()
@@ -97,6 +96,21 @@ public class LogicBoard
         {
             this.gameboard[this.BSize - 1][i].addNeighbor(this.gameboard[this.BSize - 1][i + 1], Enums.Paths.RIGHT);
             this.gameboard[i][this.BSize - 1].addNeighbor(this.gameboard[i + 1][this.BSize - 1], Enums.Paths.BOTTOM);
+        }
+    }
+    
+    // sets all of the available intersections for walls in the game
+    private void setIntersections()
+    {
+        this.VerticalIntersections = new HashSet<>();
+        this.HorizontalIntersections = new HashSet<>();
+        for (int i = 1; i < this.BSize; i++)
+        {
+            for (int j = 1; j <= this.BSize; j++)
+            {
+                this.VerticalIntersections.add(new Pair(i, j));
+                this.HorizontalIntersections.add(new Pair(i, j));
+            }
         }
     }
 }

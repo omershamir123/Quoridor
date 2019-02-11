@@ -21,7 +21,7 @@ public class HorizontalWall extends Wall
 {
 
     public HorizontalWall()
-    {
+    {   
         String path = "C:\\Users\\Omer\\Documents\\Ort Hermelin\\Quoridor Project\\Quoridor_D1\\src\\Images\\";
         path += "Horizontal_Wall.png";
         Image wall_image = Toolkit.getDefaultToolkit().getImage(path);
@@ -32,10 +32,18 @@ public class HorizontalWall extends Wall
     public boolean checkIntersections(int row, int col)
     {
         LogicBoard b = LogicBoard.getInstance();
-        // same intersection exists
-        if (b.VerticalIntersections.contains(new Pair(row, col+1)) || b.HorizontalIntersections.contains(new Pair(row, col+1)))
+        if (row == b.BSize - 1 && col == b.BSize - 1)
             return true;
-        if (b.HorizontalIntersections.contains(new Pair(row, col)) || b.HorizontalIntersections.contains(new Pair(row, col+2)))
+        // same intersection exists
+        if (!b.HorizontalIntersections.contains(new Pair(row, col+1)) || !b.VerticalIntersections.contains(new Pair(row, col+1)))
+            return true;
+        // intersection of the same wall type exists to the left of the currently attempted intersection
+        // first make sure an intersection as such is even possible
+        if (row != 0 && col != 0 && !b.HorizontalIntersections.contains(new Pair(row, col)))
+            return true;
+        // intersection of the same wall type exists to the right of the currently attempted intersection
+        // first make sure an intersection as such is even possible
+        if (row < b.BSize-1 && row != 0 && !b.HorizontalIntersections.contains(new Pair(row, col+2)))
             return true;
         return false;
     }
@@ -62,9 +70,11 @@ public class HorizontalWall extends Wall
         }
         // Align the wall to its right place
         this.setLocation(col*60 + 5, row*60 - 5);
-        LogicBoard.getInstance().HorizontalIntersections.add(new Pair<>(row, col+1));
+        LogicBoard.getInstance().HorizontalIntersections.remove(new Pair<>(row, col+1));
         // The wall has been set in place
         this.placed = true;
+        this.origin_X = this.getX();
+        this.origin_Y = this.getY();
         // CHANGE NEIGHBORS OF CELLS
     }
 }
