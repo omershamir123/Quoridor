@@ -6,6 +6,7 @@
 package Logic;
 
 import GUI.Cell;
+import javax.swing.JLabel;
 
 /**
  *
@@ -15,9 +16,10 @@ public class Player
 {
     public Cell place;
     public int playerNo;
-    private int endingRow;
-    private int endingCol;
-    private int wallsLeft;
+    protected int endingRow;
+    protected int endingCol;
+    protected int wallsLeft;
+    protected JLabel wallsInfo;
     
     /**
      * Constructor of the player
@@ -33,6 +35,7 @@ public class Player
         this.endingRow = endingRow;
         this.endingCol = endingCol;
         this.wallsLeft = MaxWalls;
+        this.wallsInfo = null;
     }
     
     // Sets the place of the current player to a different cell
@@ -63,6 +66,17 @@ public class Player
     public void setWallsLeft(int wallsLeft)
     {
         this.wallsLeft = wallsLeft;
+        this.wallsInfo.setText("Player "+playerNo+" walls Left: "+getWallsLeft());
+    }
+    
+    public JLabel getWallsInfo()
+    {
+        return wallsInfo;
+    }
+
+    public void setWallsInfo(JLabel wallsInfo)
+    {
+        this.wallsInfo = wallsInfo;
     }
     
 }

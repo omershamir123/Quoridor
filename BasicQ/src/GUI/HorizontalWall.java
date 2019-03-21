@@ -27,8 +27,20 @@ public class HorizontalWall extends Wall
         Image wall_image = Toolkit.getDefaultToolkit().getImage(path);
         ImageIcon icon = new ImageIcon(wall_image);
         this.setIcon(icon);
+        this.setSize(110, 10);
     }
     
+    public boolean isLocationValid(Point p)
+    {
+        return locationBetweenBoards(p.x) && locationBetweenBoards(p.y) && p.y >= 45;
+    }
+    
+    /**
+     * This function checks whether a wall placement is possible based on other walls on the board
+     * @param row - upper left row
+     * @param col - upper left col
+     * @return 
+     */
     public boolean checkIntersections(int row, int col)
     {
         if (row == board.BSize - 1 && col == board.BSize - 1)
@@ -42,16 +54,42 @@ public class HorizontalWall extends Wall
             return true;
         // intersection of the same wall type exists to the right of the currently attempted intersection
         // first make sure an intersection as such is even possible
-        if (row < board.BSize-1 && row != 0 && !board.HorizontalIntersections.contains(new Pair(row, col+2)))
+        if (col < board.BSize-2 && !board.HorizontalIntersections.contains(new Pair(row, col+2)))
             return true;
         return false;
+    }
+    
+    public boolean isPlayerBlocked(int row, int col)
+    {
+        boolean blocked = false;
+        deleteNeighbors(row, col);
+        for (Logic.Player player : board.players)
+        {
+            if (Logic.AI.BFS(player.place.getMoveOptions(), player) == null)
+                blocked = true;
+        }
+        if (blocked)
+            resetNeighbors(row, col);
+        return blocked;
+    }
+    
+    /**
+     * This function updates the cells' neighbors after a wall has been placed and there is not available pah for a player
+    * The function receives the row and the column of the upper left corner of the wall
+    */
+    private void resetNeighbors(int row, int col)
+    {
+        board.cells[row][col].neighbors[Cell.Paths.TOP.ordinal()] = board.cells[row-1][col];
+        board.cells[row][col+1].neighbors[Cell.Paths.TOP.ordinal()] = board.cells[row-1][col+1];
+        board.cells[row-1][col].neighbors[Cell.Paths.BOTTOM.ordinal()] = board.cells[row][col];
+        board.cells[row-1][col+1].neighbors[Cell.Paths.BOTTOM.ordinal()] = board.cells[row-1][col+1];
     }
     
     /**
      * This function updates the cells' neighbors after a wall has been placed
     * The function receives the row and the column of the upper left corner of the wall
     */
-    private void updateNeighbors(int row, int col)
+    private void deleteNeighbors(int row, int col)
     {
         board.cells[row][col].neighbors[Cell.Paths.TOP.ordinal()] = null;
         board.cells[row][col+1].neighbors[Cell.Paths.TOP.ordinal()] = null;
@@ -78,7 +116,7 @@ public class HorizontalWall extends Wall
             return;
         }
         Point p = this.getLocation();
-        if (!locationBetweenBoards(p.x) || !locationBetweenBoards(p.y) || p.y < 45)
+        if (!isLocationValid(p))
         {
             this.setLocation(this.origin_X, this.origin_Y);
             board.panel.info.setText("Wrong Placement");
@@ -87,23 +125,28 @@ public class HorizontalWall extends Wall
          int row = Math.round((float)p.y/60);
         int col = Math.round((float)p.x/60);
         // Check whether the placed wall intersects with another placed wall
-        if (checkIntersections(row, col))// || CHECKPATHEXISTS())
+        if (checkIntersections(row, col) || isPlayerBlocked(row, col))
         {
             this.setLocation(this.origin_X, this.origin_Y);
             board.panel.info.setText("Unavailable space");
             return;
         }
-        // Align the wall to its right place
-        this.setLocation(col*60 + 5, row*60 - 5);
-        board.HorizontalIntersections.remove(new Pair<>(row, col+1));
         // The wall has been set in place
         this.placed = true;
         this.origin_X = this.getX();
         this.origin_Y = this.getY();
+        placeWall(row, col);
+    }
+
+    public void placeWall(int row, int col)
+    {
+        // Align the wall to its right place
+        this.setLocation(col*60 + 5, row*60 - 5);
+        board.HorizontalIntersections.remove(new Pair<>(row, col+1));
         // Make the neighbors of the current cell unclickable first, and then 
         // update the neighbors
         board.players[board.currentPlayer].place.SetOptionsForCurrentPlayer(false);
-        updateNeighbors(row, col);
+        deleteNeighbors(row, col);
         board.endTurn(board.players[board.currentPlayer].place, true);
     }
 }

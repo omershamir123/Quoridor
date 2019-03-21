@@ -10,6 +10,7 @@ import Logic.Player;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 
@@ -108,10 +109,30 @@ public class Cell extends JButton
         }
     }
     
-     // This function sets the neighbors of the current player clickable or not
+    // This function sets the neighbors of the current player clickable or not
     // Depending on whether it is the beginning of the turn or the end of it
     public void SetOptionsForCurrentPlayer(boolean IsBegin)
     {
+        ArrayList<Cell[]> optionsToSet = getMoveOptions();
+        for (Cell[] cells : optionsToSet)
+        {
+            for (Cell cell : cells)
+            {
+                if (cell != null)
+                    cell.setClickable(IsBegin);
+            }
+        }
+    }
+    
+    /**
+     * This function checks the possible cells to move from the current place
+     * @return returns an ArrayList with the length of 4 (top, bottom, left, right)
+     * If there is more than one option for a certain direction, the function will 
+     * return an array of the possible moves in that direction
+     */
+    public ArrayList<Cell[]> getMoveOptions()
+    {
+        ArrayList<Cell[]> options = new ArrayList<>();
         for (int i = 0; i < 4; i++)
         {
             boolean noNeighbor = true;
@@ -125,7 +146,8 @@ public class Cell extends JButton
                     // Check whether the current player can jump over the other
                     if (player.place.neighbors[i] != null)
                     {
-                        player.place.neighbors[i].setClickable(IsBegin);
+                        options.add(new Cell[1]);
+                        options.get(i)[0] = player.place.neighbors[i];
                         // If not, go for the other two directions
                     } else
                     {
@@ -136,18 +158,26 @@ public class Cell extends JButton
                         // If i = 0/1 -> make 2,3 clickable
                         // If i = 2/3 -> make 0,1 clickable
                         int indexToSet = ((i+2)-(i%2))%4;
+                        options.add(new Cell[2]);
+                        options.get(i)[0] = options.get(i)[1] = null;
                         if (player.place.neighbors[indexToSet] != null)
-                            player.place.neighbors[indexToSet].setClickable(IsBegin);
+                            options.get(i)[0] = player.place.neighbors[indexToSet];
                         if (player.place.neighbors[indexToSet+1] != null)
-                            player.place.neighbors[indexToSet+1].setClickable(IsBegin);
+                            options.get(i)[1] = player.place.neighbors[indexToSet+1];
                         
                     }
                 }
             }
-            if (this.neighbors[i] != null && noNeighbor)
+            if (noNeighbor)
             {
-                this.neighbors[i].setClickable(IsBegin);
+                options.add(new Cell[1]);
+                options.get(i)[0] = null;
+                if (this.neighbors[i] != null)
+                {
+                    options.get(i)[0] = this.neighbors[i];
+                }
             }
         }
+        return options;
     }
 }

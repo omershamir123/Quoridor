@@ -16,7 +16,7 @@ import javax.swing.JButton;
  *
  * @author Omer
  */
-public class Wall extends JButton implements MouseListener, MouseMotionListener
+public abstract class Wall extends JButton implements MouseListener, MouseMotionListener
 {
     private int x1, y1;                     // original internal coordinates of the dragged wall, within the wall
     public int origin_X, origin_Y;          // original coordinates of the wall in the panel
@@ -39,6 +39,11 @@ public class Wall extends JButton implements MouseListener, MouseMotionListener
         origin_Y = y;
     }
     
+    public abstract boolean isLocationValid(Point p);
+    public abstract boolean checkIntersections(int row, int col);
+    public abstract boolean isPlayerBlocked(int row, int col);
+    public abstract void placeWall(int row, int col);
+    
     /**
      * Returns whether a current coordinate is between two cells or not
      * The program lets the user a 10 pixel buffer
@@ -58,7 +63,6 @@ public class Wall extends JButton implements MouseListener, MouseMotionListener
     
     @Override
     public void mouseClicked(MouseEvent e) {
-        System.out.println("Hi");
     }
 
     @Override
@@ -79,7 +83,7 @@ public class Wall extends JButton implements MouseListener, MouseMotionListener
     @Override
     public void mouseDragged(MouseEvent e)
     {        
-        if (this.placed)
+        if (this.placed || board.gameOver)
             return;
         Point   POld =  getLocation();
         int XNew , YNew;

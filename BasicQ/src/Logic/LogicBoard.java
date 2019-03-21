@@ -9,8 +9,10 @@ import GUI.Cell;
 import GUI.BoardPanel;
 import GUI.HorizontalWall;
 import GUI.VerticalWall;
+import java.awt.Font;
 import java.util.HashSet;
 import javafx.util.Pair;
+import javax.swing.JLabel;
 
 /**
  *
@@ -34,6 +36,8 @@ public class LogicBoard
     private int MaxWalls = 10;
     // The index of the current player in the player array
     public int currentPlayer = 0;
+    // Is the game over
+    public boolean gameOver = false;
     // set of intesections available for vertical walls on the board
     public HashSet<Pair<Integer, Integer>> VerticalIntersections;
     // set of intesections available for horizontal walls on the board
@@ -60,12 +64,12 @@ public class LogicBoard
         {
             VerticalWall vw = new VerticalWall(this);
             vw.SetCoordinates(this.BSize * 60 + 75, (this.BSize / 2 - 1) * 60 + 25);
-            vw.setSize(10, 110);
+            //vw.setSize(10, 110);
             panel.add(vw);
 
             HorizontalWall hw = new HorizontalWall(this);
             hw.SetCoordinates(this.BSize * 60 + 25, (this.BSize / 2 - 1) * 60 + 5);
-            hw.setSize(110, 10);
+            //hw.setSize(110, 10);
             panel.add(hw);
         }
     }
@@ -105,11 +109,21 @@ public class LogicBoard
     {
         this.players = new Player[2];
         this.players[0] = new Player(1, BSize - 1, -1, this.MaxWalls);
-        this.players[1] = new Player(2, 0, -1, this.MaxWalls);
+        this.players[1] = new AI(2, 0, -1, this.MaxWalls, this);
+        //this.players[1] = new Player(2, 0, -1, this.MaxWalls);
         this.currentPlayer = 0;
         players[0].setPlace(cells[0][4]);
         players[1].setPlace(cells[8][4]);
         players[0].place.SetOptionsForCurrentPlayer(true);
+        for (Player player : players)
+        {
+            JLabel wallsInfo = new JLabel("Player "+player.playerNo+" walls Left: "+player.getWallsLeft());
+            wallsInfo.setSize(500,30);
+            wallsInfo.setFont(new Font("ComicSans", 1, 14));
+            wallsInfo.setLocation(10+(player.playerNo-1)*250, BSize * 60 + 15);
+            panel.add(wallsInfo);
+            player.setWallsInfo(wallsInfo);
+        }
 
     }
 
@@ -139,6 +153,8 @@ public class LogicBoard
      */
     public void endTurn(Cell cell, boolean isWallMove)
     {
+        this.players[this.currentPlayer].place.setIcon(null);
+        this.players[this.currentPlayer].setPlace(cell);
         // only disables current cells' neighbors if it is a move of pieces
         if (!isWallMove)
         {
@@ -154,16 +170,18 @@ public class LogicBoard
         {
             this.players[this.currentPlayer].setWallsLeft(this.players[currentPlayer].getWallsLeft() - 1);
         }
-        this.players[this.currentPlayer].place.setIcon(null);
-        this.players[this.currentPlayer].setPlace(cell);
         this.currentPlayer = (this.currentPlayer + 1) % this.players.length;
-        this.players[this.currentPlayer].place.SetOptionsForCurrentPlayer(true);
         this.panel.info.setText("Player " + (this.currentPlayer + 1) + "'s Turn");
+        if (this.players[this.currentPlayer] instanceof AI)
+            ((AI)this.players[this.currentPlayer]).computerMove();
+        else
+            this.players[this.currentPlayer].place.SetOptionsForCurrentPlayer(true);
     }
     
     // The game has ended and the current player has won
     private void endGame()
     {
+        this.gameOver = true;
         this.panel.info.setText("Player " + (this.currentPlayer + 1) + " Won the game");
     }
 }
