@@ -70,11 +70,10 @@ public class VerticalWall extends Wall
         deleteNeighbors(row, col);
         for (Logic.Player player : board.players)
         {
-            if (Logic.AI.BFS(player.place.getMoveOptions(), player) == null)
+            if (Logic.AI.BFS(player.place.getMoveOptions(), player, null) == null)
                 blocked = true;
         }
-        if (blocked)
-            resetNeighbors(row, col);
+        resetNeighbors(row, col);
         return blocked;
     }
     
@@ -82,7 +81,8 @@ public class VerticalWall extends Wall
      * This function updates the cells' neighbors after a wall has been placed and there is not available path for the opponent
      * The function receives the row and the column of the upper left corner of the wall
      */
-    private void resetNeighbors(int row, int col)
+    @Override
+    public void resetNeighbors(int row, int col)
     {
         board.cells[row][col].neighbors[Cell.Paths.LEFT.ordinal()] = board.cells[row][col-1];
         board.cells[row+1][col].neighbors[Cell.Paths.LEFT.ordinal()] = board.cells[row+1][col-1];
@@ -94,7 +94,8 @@ public class VerticalWall extends Wall
      * This function updates the cells' neighbors after a wall has been placed
      * The function receives the row and the column of the upper left corner of the wall
      */
-    private void deleteNeighbors(int row, int col)
+    @Override
+    public void deleteNeighbors(int row, int col)
     {
         board.cells[row][col].neighbors[Cell.Paths.LEFT.ordinal()] = null;
         board.cells[row+1][col].neighbors[Cell.Paths.LEFT.ordinal()] = null;
@@ -137,6 +138,7 @@ public class VerticalWall extends Wall
         placeWall(row, col);
     }
     
+    @Override
     public void placeWall(int row, int col)
     {
         // Align the wall to its right place

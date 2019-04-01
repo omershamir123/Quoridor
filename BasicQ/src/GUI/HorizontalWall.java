@@ -65,11 +65,10 @@ public class HorizontalWall extends Wall
         deleteNeighbors(row, col);
         for (Logic.Player player : board.players)
         {
-            if (Logic.AI.BFS(player.place.getMoveOptions(), player) == null)
+            if (Logic.AI.BFS(player.place.getMoveOptions(), player, null) == null)
                 blocked = true;
         }
-        if (blocked)
-            resetNeighbors(row, col);
+        resetNeighbors(row, col);
         return blocked;
     }
     
@@ -77,19 +76,21 @@ public class HorizontalWall extends Wall
      * This function updates the cells' neighbors after a wall has been placed and there is not available pah for a player
     * The function receives the row and the column of the upper left corner of the wall
     */
-    private void resetNeighbors(int row, int col)
+    @Override
+    public void resetNeighbors(int row, int col)
     {
         board.cells[row][col].neighbors[Cell.Paths.TOP.ordinal()] = board.cells[row-1][col];
         board.cells[row][col+1].neighbors[Cell.Paths.TOP.ordinal()] = board.cells[row-1][col+1];
         board.cells[row-1][col].neighbors[Cell.Paths.BOTTOM.ordinal()] = board.cells[row][col];
-        board.cells[row-1][col+1].neighbors[Cell.Paths.BOTTOM.ordinal()] = board.cells[row-1][col+1];
+        board.cells[row-1][col+1].neighbors[Cell.Paths.BOTTOM.ordinal()] = board.cells[row][col+1];
     }
     
     /**
      * This function updates the cells' neighbors after a wall has been placed
     * The function receives the row and the column of the upper left corner of the wall
     */
-    private void deleteNeighbors(int row, int col)
+    @Override
+    public void deleteNeighbors(int row, int col)
     {
         board.cells[row][col].neighbors[Cell.Paths.TOP.ordinal()] = null;
         board.cells[row][col+1].neighbors[Cell.Paths.TOP.ordinal()] = null;

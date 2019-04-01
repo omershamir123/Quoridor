@@ -43,6 +43,8 @@ public abstract class Wall extends JButton implements MouseListener, MouseMotion
     public abstract boolean checkIntersections(int row, int col);
     public abstract boolean isPlayerBlocked(int row, int col);
     public abstract void placeWall(int row, int col);
+    public abstract void resetNeighbors(int row, int col);
+    public abstract void deleteNeighbors(int row, int col);
     
     /**
      * Returns whether a current coordinate is between two cells or not
