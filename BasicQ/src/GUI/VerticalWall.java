@@ -34,7 +34,7 @@ public class VerticalWall extends Wall
     @Override
     public boolean isLocationValid(Point p)
     {
-        return locationBetweenBoards(p.x) && locationBetweenBoards(p.y) && p.x >= 45;
+        return locationBetweenBoards(p.x) && locationBetweenBoards(p.y) && p.x >= 45 && p.y < (board.BSize-1)*60;
     }
     
     /**

@@ -5,6 +5,9 @@
  */
 package GUI;
 
+import java.awt.Image;
+import java.awt.Toolkit;
+
 /**
  *
  * @author Omer
@@ -17,6 +20,9 @@ public class Game extends javax.swing.JFrame
      */
     public Game()
     {
+        super("Quoridor");
+        Image logo = Toolkit.getDefaultToolkit().getImage("Images/logo.jpg");
+        this.setIconImage(logo);
         initComponents();
     }
 

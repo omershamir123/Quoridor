@@ -30,9 +30,10 @@ public class HorizontalWall extends Wall
         this.setSize(110, 10);
     }
     
+    @Override
     public boolean isLocationValid(Point p)
     {
-        return locationBetweenBoards(p.x) && locationBetweenBoards(p.y) && p.y >= 45;
+        return locationBetweenBoards(p.x) && locationBetweenBoards(p.y) && p.y >= 45 && p.x < (board.BSize-1)*60;
     }
     
     /**
@@ -41,6 +42,7 @@ public class HorizontalWall extends Wall
      * @param col - upper left col
      * @return 
      */
+    @Override
     public boolean checkIntersections(int row, int col)
     {
         if (row == board.BSize - 1 && col == board.BSize - 1)
@@ -92,10 +94,17 @@ public class HorizontalWall extends Wall
     @Override
     public void deleteNeighbors(int row, int col)
     {
+        try 
+        {
         board.cells[row][col].neighbors[Cell.Paths.TOP.ordinal()] = null;
         board.cells[row][col+1].neighbors[Cell.Paths.TOP.ordinal()] = null;
         board.cells[row-1][col].neighbors[Cell.Paths.BOTTOM.ordinal()] = null;
         board.cells[row-1][col+1].neighbors[Cell.Paths.BOTTOM.ordinal()] = null;
+        }
+        catch (Exception e)
+        {
+            System.out.println(row + " " + col);
+        }
     }
     
     @Override

@@ -109,8 +109,8 @@ public class LogicBoard
     {
         this.players = new Player[2];
         this.players[0] = new Player(1, BSize - 1, -1, this.MaxWalls);
-        //this.players[1] = new AI(2, 0, -1, this.MaxWalls, this);
-        this.players[1] = new Player(2, 0, -1, this.MaxWalls);
+        this.players[1] = new AI(2, 0, -1, this.MaxWalls, this);
+        //this.players[1] = new Player(2, 0, -1, this.MaxWalls);
         this.currentPlayer = 0;
         players[0].setPlace(cells[0][4]);
         players[1].setPlace(cells[8][4]);
