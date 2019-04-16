@@ -6,6 +6,7 @@
 package Logic;
 
 import GUI.Cell;
+import java.awt.Color;
 import javax.swing.JLabel;
 
 /**
@@ -16,6 +17,7 @@ public class Player
 {
     public Cell place;
     public int playerNo;
+    public Color playerColor;
     protected int endingRow;
     protected int endingCol;
     protected int wallsLeft;
@@ -32,6 +34,7 @@ public class Player
     public Player(int playerNo, int endingRow, int endingCol, int MaxWalls)
     {
         this.playerNo = playerNo;
+        this.playerColor = (playerNo==1)?Color.decode("#072604"):Color.decode("#90490A");
         this.endingRow = endingRow;
         this.endingCol = endingCol;
         this.wallsLeft = MaxWalls;

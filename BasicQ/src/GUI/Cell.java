@@ -58,7 +58,7 @@ public class Cell extends JButton
     {
         return col;
     }
-    
+
     // Sets the cell icon based on the player number
     public void setCellIcon(int playerNo)
     {
@@ -81,12 +81,13 @@ public class Cell extends JButton
                     board.endTurn(cell, false);
                 }
             });
-        } else
+            this.setBackground(this.board.players[this.board.currentPlayer].playerColor);
+        }
+        else
         {
             for (ActionListener al : this.getActionListeners())
-            {
                 this.removeActionListener(al);
-            }
+            this.setBackground(Color.BLACK);
         }
     }
 
@@ -101,34 +102,28 @@ public class Cell extends JButton
     {
         this.neighbors[p.ordinal()] = other;
         if (p.name().equals("BOTTOM"))
-        {
             other.addNeighbor(this, LogicBoard.Paths.TOP);
-        } else if (p.name().equals("RIGHT"))
-        {
+        else if (p.name().equals("RIGHT"))
             other.addNeighbor(this, LogicBoard.Paths.LEFT);
-        }
     }
-    
+
     // This function sets the neighbors of the current player clickable or not
     // Depending on whether it is the beginning of the turn or the end of it
     public void SetOptionsForCurrentPlayer(boolean IsBegin)
     {
         ArrayList<Cell[]> optionsToSet = getMoveOptions();
         for (Cell[] cells : optionsToSet)
-        {
             for (Cell cell : cells)
-            {
                 if (cell != null)
                     cell.setClickable(IsBegin);
-            }
-        }
     }
-    
+
     /**
      * This function checks the possible cells to move from the current place
-     * @return returns an ArrayList with the length of 4 (top, bottom, left, right)
-     * If there is more than one option for a certain direction, the function will 
-     * return an array of the possible moves in that direction
+     *
+     * @return returns an ArrayList with the length of 4 (top, bottom, left,
+     * right) If there is more than one option for a certain direction, the
+     * function will return an array of the possible moves in that direction
      */
     public ArrayList<Cell[]> getMoveOptions()
     {
@@ -138,7 +133,6 @@ public class Cell extends JButton
             boolean noNeighbor = true;
             // go over all of the players in the game
             for (Player player : this.board.players)
-            {
                 // if the two players are neighbors
                 if (player.place.equals(this.neighbors[i]))
                 {
@@ -148,7 +142,6 @@ public class Cell extends JButton
                     {
                         options.add(new Cell[1]);
                         options.get(i)[0] = player.place.neighbors[i];
-                        // If not, go for the other two directions
                     } else
                     {
                         // If the other player is above the current player, and there is
@@ -157,25 +150,22 @@ public class Cell extends JButton
                         // Neighbors {TOP, BOTTOM, LEFT, RIGHT}
                         // If i = 0/1 -> make 2,3 clickable
                         // If i = 2/3 -> make 0,1 clickable
-                        int indexToSet = ((i+2)-(i%2))%4;
+                        int indexToSet = ((i + 2) - (i % 2)) % 4;
                         options.add(new Cell[2]);
                         options.get(i)[0] = options.get(i)[1] = null;
                         if (player.place.neighbors[indexToSet] != null)
                             options.get(i)[0] = player.place.neighbors[indexToSet];
-                        if (player.place.neighbors[indexToSet+1] != null)
-                            options.get(i)[1] = player.place.neighbors[indexToSet+1];
-                        
+                        if (player.place.neighbors[indexToSet + 1] != null)
+                            options.get(i)[1] = player.place.neighbors[indexToSet + 1];
+
                     }
                 }
-            }
             if (noNeighbor)
             {
                 options.add(new Cell[1]);
                 options.get(i)[0] = null;
                 if (this.neighbors[i] != null)
-                {
                     options.get(i)[0] = this.neighbors[i];
-                }
             }
         }
         return options;

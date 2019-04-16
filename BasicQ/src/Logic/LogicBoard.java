@@ -13,6 +13,7 @@ import java.awt.Font;
 import java.util.HashSet;
 import javafx.util.Pair;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -33,11 +34,16 @@ public class LogicBoard
     // The board size
     public int BSize = 9;
     // The number of walls allowed for each player
-    private int MaxWalls = 10;
+    private final int MaxWalls = 10;
     // The index of the current player in the player array
     public int currentPlayer = 0;
+    // the current turn of the game
+    public int turnNumber = 0;
     // Is the game over
     public boolean gameOver = false;
+    // The game mode - 0 (1VS1) OR 1(1VSComp)
+    private int gameMode;
+    private final int COMPUTER_GAME = 1;
     // set of intesections available for vertical walls on the board
     public HashSet<Pair<Integer, Integer>> VerticalIntersections;
     // set of intesections available for horizontal walls on the board
@@ -51,10 +57,24 @@ public class LogicBoard
     public LogicBoard(BoardPanel panel)
     {
         this.panel = panel;
+        this.gameMode = chooseGameMode();
+        if (this.gameMode == -1)
+            System.exit(0);
         setWalls();
         setCells();
         setIntersections();
         setPlayers();
+    }
+    
+    private int chooseGameMode()
+    {
+        String[] choices = { "Player Vs. Player", "Player Vs. Computer" };
+        String input = (String) JOptionPane.showInputDialog(null, "Choose the game Mode you wish to select",
+        "QUORIDOR", JOptionPane.QUESTION_MESSAGE, null, choices, choices[1]);
+        for (int i = 0; i < choices.length; i++)
+            if (choices[i].equals(input))
+                return i;
+        return -1;
     }
 
     // setting up the walls for this game
@@ -109,22 +129,24 @@ public class LogicBoard
     {
         this.players = new Player[2];
         this.players[0] = new Player(1, BSize - 1, -1, this.MaxWalls);
-        this.players[1] = new AI(2, 0, -1, this.MaxWalls, this);
-        //this.players[1] = new Player(2, 0, -1, this.MaxWalls);
+        if (this.gameMode == COMPUTER_GAME)
+            this.players[1] = new AI(2, 0, -1, this.MaxWalls, this);
+        else
+            this.players[1] = new Player(2, 0, -1, this.MaxWalls);
         this.currentPlayer = 0;
         players[0].setPlace(cells[0][4]);
         players[1].setPlace(cells[8][4]);
-        players[0].place.SetOptionsForCurrentPlayer(true);
         for (Player player : players)
         {
             JLabel wallsInfo = new JLabel("Player "+player.playerNo+" walls Left: "+player.getWallsLeft());
             wallsInfo.setSize(500,30);
-            wallsInfo.setFont(new Font("ComicSans", 1, 14));
+            wallsInfo.setFont(new Font("ComicSans", 1, 16));
             wallsInfo.setLocation(10+(player.playerNo-1)*250, BSize * 60 + 15);
+            wallsInfo.setForeground(player.playerColor);
             panel.add(wallsInfo);
             player.setWallsInfo(wallsInfo);
         }
-
+        players[0].place.SetOptionsForCurrentPlayer(true);
     }
 
     // sets all of the available intersections for walls in the game
@@ -156,6 +178,7 @@ public class LogicBoard
         this.players[this.currentPlayer].place.SetOptionsForCurrentPlayer(false);
         this.players[this.currentPlayer].place.setIcon(null);
         this.players[this.currentPlayer].setPlace(cell);
+        this.turnNumber++;
         // only disables current cells' neighbors if it is a move of pieces
         if (!isWallMove)
         {
@@ -183,5 +206,18 @@ public class LogicBoard
     {
         this.gameOver = true;
         this.panel.info.setText("Player " + (this.currentPlayer + 1) + " Won the game");
+        this.panel.info.setForeground(this.players[this.currentPlayer].playerColor);
+        String[] choices = { "Yes", "No" };
+        String input = (String)JOptionPane.showInputDialog(null, "Player " + (this.currentPlayer + 1) + " won the game \n Would you like to replay?", 
+                "WINNER", JOptionPane.QUESTION_MESSAGE, null, choices, choices[0]);
+        if (input.equals("Yes"))
+        {
+            this.panel.removeAll();
+            this.panel.setPanel();
+            LogicBoard l = new LogicBoard(panel);
+            this.panel.board = l;
+            this.panel.revalidate();
+            this.panel.repaint();
+        }
     }
 }

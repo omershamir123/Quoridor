@@ -26,17 +26,7 @@ public class BoardPanel extends javax.swing.JPanel
     public BoardPanel()
     {
         board = new LogicBoard(this);
-        this.setBackground(new Color(128, 49, 49));
-        JLabel title = new JLabel("Welcome To Quoridor!!!");
-        title.setSize(500,30);
-        title.setFont(new Font("ComicSans", 1, 14));
-        title.setLocation(board.BSize * 60 + 15, 30);
-        this.info.setText("Player 1 Begin");
-        this.info.setSize(500, 30);
-        this.info.setFont(new Font("Comic Sans", 1, 14));
-        this.info.setLocation(board.BSize * 60 + 15, 150);
-        this.add(title);
-        this.add(this.info);
+        setPanel();
         initComponents();
     }
 
@@ -61,6 +51,21 @@ public class BoardPanel extends javax.swing.JPanel
             .addGap(0, 300, Short.MAX_VALUE)
         );
     }// </editor-fold>//GEN-END:initComponents
+
+    public void setPanel()
+    {
+        this.setBackground(new Color(128, 49, 49));
+        JLabel title = new JLabel("Welcome To Quoridor!!!");
+        title.setSize(500,30);
+        title.setFont(new Font("ComicSans", 1, 14));
+        title.setLocation(board.BSize * 60 + 15, 30);
+        this.info.setText("Player 1 Begin");
+        this.info.setSize(500, 30);
+        this.info.setFont(new Font("Comic Sans", 1, 14));
+        this.info.setLocation(board.BSize * 60 + 15, 150);
+        this.add(title);
+        this.add(this.info);
+    }
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

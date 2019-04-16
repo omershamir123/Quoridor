@@ -24,6 +24,8 @@ public class Game extends javax.swing.JFrame
         Image logo = Toolkit.getDefaultToolkit().getImage("Images/logo.jpg");
         this.setIconImage(logo);
         initComponents();
+        this.setResizable(false);
+        this.setLocationRelativeTo(null);
     }
 
     /**
