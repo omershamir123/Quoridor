@@ -6,7 +6,6 @@
 package GUI;
 
 import Logic.LogicBoard;
-import java.awt.Font;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -34,7 +33,7 @@ public class VerticalWall extends Wall
     @Override
     public boolean isLocationValid(Point p)
     {
-        return locationBetweenBoards(p.x) && locationBetweenBoards(p.y) && p.x >= 45 && p.y < (board.BSize-1)*60;
+        return locationBetweenBoards(p.x) && locationBetweenBoards(p.y) && p.x >= 45 && p.y < (board.BSize-1)*Cell.CELL_WIDTH;
     }
     
     /**
@@ -47,34 +46,17 @@ public class VerticalWall extends Wall
     public boolean checkIntersections(int row, int col)
     {
         // same intersection exists
-        if (!board.VerticalIntersections.contains(new Pair(row+1, col)) || !board.HorizontalIntersections.contains(new Pair(row+1, col)))
+        if (board.VerticalIntersections.contains(new Pair(row+1, col)) || board.HorizontalIntersections.contains(new Pair(row+1, col)))
             return true;
         // intersection of the same wall type exists above the currently attempted intersection
         // first make sure an intersection as such is even possible
-        if (row != 0 && col != 0 && !board.VerticalIntersections.contains(new Pair(row, col)))
+        if (row != 0 && col != 0 && board.VerticalIntersections.contains(new Pair(row, col)))
             return true;
         // intersection of the same wall type exists below the currently attempted intersection
         // first make sure an intersection as such is even possible
-        if ((row < board.BSize-2) && !board.VerticalIntersections.contains(new Pair(row+2, col)))
+        if ((row < board.BSize-2) && board.VerticalIntersections.contains(new Pair(row+2, col)))
             return true;
         return false;
-    }
-    
-    @Override
-    /**
-     * the function checks whether a wall placement blocks a player from reaching the target
-     */
-    public boolean isPlayerBlocked(int row, int col)
-    {
-        boolean blocked = false;
-        deleteNeighbors(row, col);
-        for (Logic.Player player : board.players)
-        {
-            if (Logic.AI.BFS(player.place.getMoveOptions(), player, null) == null)
-                blocked = true;
-        }
-        resetNeighbors(row, col);
-        return blocked;
     }
     
     /**
@@ -123,8 +105,8 @@ public class VerticalWall extends Wall
             return;
         }
         // Check whether the placed wall intersects with another placed wall
-        int row = Math.round((float)p.y/60);
-        int col = Math.round((float)p.x/60);
+        int row = Math.round((float)p.y/Cell.CELL_WIDTH);
+        int col = Math.round((float)p.x/Cell.CELL_WIDTH);
         if (checkIntersections(row, col) || isPlayerBlocked(row, col))
         {
             this.setLocation(this.origin_X, this.origin_Y);
@@ -142,8 +124,8 @@ public class VerticalWall extends Wall
     public void placeWall(int row, int col)
     {
         // Align the wall to its right place
-        this.setLocation(col*60 -5, row*60 +5);
-        board.VerticalIntersections.remove(new Pair<>(row+1, col));
+        this.setLocation(col*Cell.CELL_WIDTH -5, row*Cell.CELL_WIDTH +5);
+        board.VerticalIntersections.add(new Pair<>(row+1, col));
         // Make the neighbors of the current cell unclickable first, and then 
         // update the neighbors
         board.players[board.currentPlayer].place.SetOptionsForCurrentPlayer(false);

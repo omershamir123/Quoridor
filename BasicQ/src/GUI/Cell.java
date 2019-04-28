@@ -25,26 +25,26 @@ public class Cell extends JButton
     {
         TOP, BOTTOM, LEFT, RIGHT
     };
-
+    public static final int CELL_WIDTH = 60;
     // // The gameboard itself
     public LogicBoard board;
     public Cell[] neighbors = new Cell[4];
-    private int row;
-    private int col;
+    private final int row;
+    private final int col;
 
     /**
      * Constructor of the cell, sets the
      *
-     * @param i - the row of the cell
-     * @param j - the column of the cell
+     * @param row - the row of the cell
+     * @param col - the column of the cell
      * @param board - the instance of the logical board
      */
-    public Cell(int i, int j, LogicBoard board)
+    public Cell(int row, int col, LogicBoard board)
     {
-        this.row = i;
-        this.col = j;
+        this.row = row;
+        this.col = col;
         this.board = board;
-        this.setBounds(j * 60 + 5, i * 60 + 5, 50, 50);
+        this.setBounds(col * CELL_WIDTH + 5, row * CELL_WIDTH + 5, 50, 50);
         this.setBackground(Color.black);
 
     }

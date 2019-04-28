@@ -22,12 +22,12 @@ import javafx.util.Pair;
  */
 public class AI extends Player
 {
-    private final int MIN_LENGTH_PATH_OF_OPPONENT = 3;
     private final int PATH_LENGTH_TO_WIN = 2;
     // in the beginning, until the 10th turn, the path difference allowed
     // between the two players is 1. After the 10th turn, the path difference 
     // allowed is 0
     private int PATH_DIFFERENCE_ALLOWED = 1;
+    private final int TURNS_ALLOWED_UNTIL_DIFF_CHANGED;
     private final LogicBoard board;
     // This string will contain the wall that was found to block a weak spot
     // It will be "" if there is no wall
@@ -42,24 +42,24 @@ public class AI extends Player
     {
         super(playerNo, endingRow, endingCol, MaxWalls);
         this.board = board;
+        this.TURNS_ALLOWED_UNTIL_DIFF_CHANGED = board.BSize + 1;
     }
 
     public void computerMove()
     {
         // reset the wall Blocking the weak Spot
-        this.wallBlockingWeakSpot = "";
+        wallBlockingWeakSpot = "";
         // Check the turn number and switch accordingly the PATH_DIFFERENCE_ALLOWED
-        this.PATH_DIFFERENCE_ALLOWED = (this.board.turnNumber >= 10)?0:1;
+        PATH_DIFFERENCE_ALLOWED = (this.board.turnNumber >= TURNS_ALLOWED_UNTIL_DIFF_CHANGED)?0:1;
         ArrayList<Cell[]> moveOptions = this.place.getMoveOptions();
         ArrayList<Cell> shortestPath = BFS(moveOptions, this, null);
-        ArrayList<Cell[]> opMoveOptions = this.board.players[(this.board.currentPlayer + 1) % 2].place.getMoveOptions();
-        ArrayList<Cell> opponentPath = BFS(opMoveOptions, this.board.players[(this.board.currentPlayer + 1) % 2], null);
+        ArrayList<Cell[]> opMoveOptions = this.board.players[(board.currentPlayer + 1) % 2].place.getMoveOptions();
+        ArrayList<Cell> opponentPath = BFS(opMoveOptions, board.players[(board.currentPlayer + 1) % 2], null);
         // If the opponent's shortest path is shorter than the computer by more than one
-        // Or the path length of the opponent is three squares long, place a wall to block the opponent
-        // Only try to palce a wall if the next move is not a winning move
+        // depending on the turn number
+        // Only try to place a wall if the next move is not a winning move
         if ( shortestPath.size() > PATH_LENGTH_TO_WIN && 
-            (shortestPath.size() - PATH_DIFFERENCE_ALLOWED > opponentPath.size() || 
-                (opponentPath.size() <= MIN_LENGTH_PATH_OF_OPPONENT)))
+            shortestPath.size() - PATH_DIFFERENCE_ALLOWED > opponentPath.size())
         {
             if (this.wallsLeft == 0 || !blockOpponent(opponentPath, opMoveOptions, false))
                 tryToMove(moveOptions, shortestPath, opMoveOptions, opponentPath);
@@ -113,27 +113,36 @@ public class AI extends Player
         if (shortestPathsEnds.isEmpty())
             return null;
         else
+            return determineShortestPath(shortestPathsEnds, parentNodes);
+    }
+    
+    /**
+     * This function gets the parentNodes from the BFS and the shortest paths' possible ends.
+     * It determines which path is indeed the shortest one.
+     * @param shortestPathsEnds  the shortest paths possible ends
+     * @param parentNodes  the parent Nodes HashMap created by the BFS
+     * @return an ArrayList of the shortest path
+     */
+    public static ArrayList<Cell> determineShortestPath(ArrayList<Cell> shortestPathsEnds,  HashMap<Cell, Cell> parentNodes)
+    {
+        ArrayList<Cell> shortestPath = new ArrayList<>();
+        ArrayList<Cell> currentPath = new ArrayList<>();
+        for (Cell shortestPathsEnd : shortestPathsEnds)
         {
-            ArrayList<Cell> shortestPath = new ArrayList<>();
-            ArrayList<Cell> currentPath = new ArrayList<>();
-            for (Cell shortestPathsEnd : shortestPathsEnds)
+            currentPath.clear();
+            while (shortestPathsEnd != null)
             {
-                currentPath.clear();
-                while (shortestPathsEnd != null)
-                {
-                    currentPath.add(shortestPathsEnd);
-                    shortestPathsEnd = parentNodes.get(shortestPathsEnd);
-                }
-                if (shortestPath.isEmpty() || shortestPath.size() > currentPath.size())
-                {
-                    shortestPath.clear();
-                    shortestPath.addAll(currentPath);
-                }
+                currentPath.add(shortestPathsEnd);
+                shortestPathsEnd = parentNodes.get(shortestPathsEnd);
             }
-            
-            Collections.reverse(shortestPath);
-            return shortestPath;
+            if (shortestPath.isEmpty() || shortestPath.size() > currentPath.size())
+            {
+                shortestPath.clear();
+                shortestPath.addAll(currentPath);
+            }
         }
+        Collections.reverse(shortestPath);
+        return shortestPath;
     }
     
     /** 
@@ -224,7 +233,6 @@ public class AI extends Player
      */
     private boolean blockOpponent(ArrayList<Cell> opponentPath, ArrayList<Cell[]> opMoveOptions, boolean fastLaneClosure)
     {
-        System.out.println("BLOCKING OPPONENT");
         int row = opponentPath.get(0).getRow();
         int col = opponentPath.get(0).getCol();
         int bestRow = -1, bestCol = -1, maxDifferenceInPath = Integer.MAX_VALUE;
@@ -239,9 +247,9 @@ public class AI extends Player
         wall = coordinate.getKey();
         row = coordinate.getValue().getKey();
         col = coordinate.getValue().getValue();
-        Point p = new Point(col * 60, row * 60);
         while (pathIndex < opponentPath.size() - 1)
         {
+            Point p = new Point(col * Cell.CELL_WIDTH, row * Cell.CELL_WIDTH);
             // check if the wall proposed is an okay wall...
             if (wall.isLocationValid(p) && !wall.checkIntersections(row, col) && !wall.isPlayerBlocked(row, col))
             {
@@ -255,6 +263,7 @@ public class AI extends Player
                 if (maxDifferenceInPath > myBFS - OpBFS)
                 {
                     // check whether the path to the next cell is now possible or taking much longer!!
+                    // USED ONLY WHEN THERE IS A NEED FOR A FAST LANE CLOSURE
                     ArrayList<Cell> newPathToNextCell = BFS(opMoveOptions, this.board.players[(this.board.currentPlayer + 1) % 2], opponentPath.get(pathIndex + 1));
                     // if you need the placement to close up a fast lane
                     if ((!fastLaneClosure) || (fastLaneClosure && (newPathToNextCell == null || newPathToNextCell.size() > pathIndex + 4)))
@@ -275,7 +284,6 @@ public class AI extends Player
                     row--;
                 else
                     col--;
-                p = new Point(col * 60, row * 60);
                 triedBothOptions = true;
             } else
             {
@@ -287,7 +295,6 @@ public class AI extends Player
                     wall = coordinate.getKey();
                     row = coordinate.getValue().getKey();
                     col = coordinate.getValue().getValue();
-                    p = new Point(col * 60, row * 60);
                     triedBothOptions = false;
                 }
             }
@@ -315,7 +322,7 @@ public class AI extends Player
             return;
         }
         if (!isThereFastLane(opponentPath, opMoveOptions, shortestPath))
-            checkMyPathWidth(moveOptions, shortestPath, shortestPath.size() - opponentPath.size()); //board.endTurn(shortestPath.get(1), false);
+            checkMyPathWidth(shortestPath);
     }
 
     /**
@@ -413,7 +420,7 @@ public class AI extends Player
         return pathWidth;
     }
 
-    private void checkMyPathWidth(ArrayList<Cell[]> moveOptions, ArrayList<Cell> shortestPath, int pathDifference)
+    private void checkMyPathWidth(ArrayList<Cell> shortestPath)
     {
         int neighborIndex, currentPathWidth;
         boolean decisionMade = false;
@@ -423,8 +430,18 @@ public class AI extends Player
             neighborIndex = determineDirection(i, shortestPath);
             currentPathWidth = calculatePathWidth(shortestPath.get(i), neighborIndex, shortestPath.get(i + 1));
             if (currentPathWidth <= 2)
-                decisionMade = handleWeakSpot(moveOptions, shortestPath, i, neighborIndex, pathDifference);
+                decisionMade = handleWeakSpot(shortestPath, i, neighborIndex);
         }
+        makeAfinalDecision(decisionMade, shortestPath);
+    }
+    
+    /**
+     * This function makes a final decision based on the weak spots found
+     * @param decisionMade whether the computer has already chosen to go on the alternate path
+     * @param shortestPath the shortest path of the computer
+     */
+    private void makeAfinalDecision(boolean decisionMade, ArrayList<Cell> shortestPath)
+    {
         // we reach this point with 3 different options, and their solutions are:
         // 1. there is no weak spot - continue with your BFS
         // 2. there is a weak spot and there is a wall that was virtually placed that covers it - place that wall on the board
@@ -442,27 +459,35 @@ public class AI extends Player
                 wall.placeWall(row, col);
             }
     }
-
-    private boolean handleWeakSpot(ArrayList<Cell[]> moveOptions, ArrayList<Cell> shortestPath, int originIndex, int neighborIndex, int opPathSize)
+    
+    /**
+     * This function handles a weak spot detected in my path width check.
+     * It looks for a possible wall an opponent can put and block completely the path
+     * If there is one, it checks for a wall to prevent the opponent from putting the dangerous wall
+     * @param shortestPath the shortest path of the computer
+     * @param originIndex the index of the weak spot
+     * @param neighborIndex the neighborIndex of the next cell in the path
+     * @return whether a move has been made or not
+     */
+    private boolean handleWeakSpot(ArrayList<Cell> shortestPath, int originIndex, int neighborIndex)
     {
-        int row = shortestPath.get(originIndex).getRow();
-        int col = shortestPath.get(originIndex).getCol();
         int bestRow = -1, bestCol = -1, maxPathDifference;
         int bestOpBFS = 0, bestMyBFS = 0;
         // Find the first wall possible to block completely this weak spot
-        Pair<Wall, Pair<Integer, Integer>> coordinate = determineRowAndColOfWall(row, col, neighborIndex);
+        Pair<Wall, Pair<Integer, Integer>> coordinate = determineRowAndColOfWall(shortestPath.get(originIndex).getRow(), shortestPath.get(originIndex).getCol(), neighborIndex);
         Wall wall = coordinate.getKey();
-        row = coordinate.getValue().getKey();
-        col = coordinate.getValue().getValue();
-        Point p = new Point(col * 60, row * 60);
-        // check both options of the wall placement and choose the one which blocks me the most
+        int row = coordinate.getValue().getKey();
+        int col = coordinate.getValue().getValue();
+        
+        // check both options of the wall placement
         for (int i = 0; i < 2; i++)
         {
+            Point p = new Point(col * Cell.CELL_WIDTH, row * Cell.CELL_WIDTH);
             // If the wall is possible to place, then check if it blocks the path completely
             if (wall.isLocationValid(p) && !wall.checkIntersections(row, col) && !wall.isPlayerBlocked(row, col))
             {
                 wall.deleteNeighbors(row, col);
-                // Now check the path width after the placement of the wall
+                // Now check the path width after the virtual placement of the wall
                 int pathWidth = calculatePathWidth(shortestPath.get(originIndex), neighborIndex, shortestPath.get(originIndex + 1));
                 // if the wall completely blocks my path - it is a danger
                 if (pathWidth == 0)
@@ -473,20 +498,13 @@ public class AI extends Player
                     ArrayList<Cell> myCurrentOpBFSPath = BFS(opCurrentMoveOptions, this.board.players[(this.board.currentPlayer + 1) % 2], null);
                     int myBFS = BFS(this.place.getMoveOptions(), this, null).size();
                     int OpBFS = myCurrentOpBFSPath.size();
-                    if (bestRow == -1)
+                    if (bestRow == -1 || OpBFS < bestOpBFS)
                     {
                         bestRow = row;
                         bestCol = col;
                         bestOpBFS = OpBFS;
                         bestMyBFS = myBFS;
-                    } else
-                        if (OpBFS < bestOpBFS)
-                        {
-                            bestRow = row;
-                            bestCol = col;
-                            bestOpBFS = OpBFS;
-                            bestMyBFS = myBFS;
-                        }
+                    } 
                 }
                 wall.resetNeighbors(row, col);
             }
@@ -494,8 +512,8 @@ public class AI extends Player
                 row--;
             else
                 col--;
-            p = new Point(col * 60, row * 60);
         }
+        
         //  FIND ACCORDNGLY THE PATH DIFFERENCE 
         maxPathDifference = bestMyBFS - bestOpBFS;
 
@@ -510,10 +528,24 @@ public class AI extends Player
 
         // BY NOW WE KNOW FOR SURE THERE IS A WEAK SPOT
         // WE NOW TRY TO BLOCK THE WEAK SPOT
-        // only if it is the first weak spot detected.
+        return blockTheWeakSpot(bestRow, bestCol, wall);
+        
+    }
+
+   /**
+    * This function receives the row and col of the wall that can block the weak spot
+    * @param bestRow row of wall
+    * @param bestCol column of wall
+    * @param wall the wall itself
+    * @return a boolean value telling us whether a move has been made or not
+    */
+    private boolean blockTheWeakSpot(int bestRow, int bestCol, Wall wall)
+    {
+        // BY NOW WE KNOW FOR SURE THERE IS WALL THAT BLOCKS THE WEAK SPOT THAT IS DANGEROUS
+        // only if it is the first weak spot detected, try to find places to block it
         if (this.wallBlockingWeakSpot.equals("") && findPlaceToStopFutureWall(bestRow, bestCol, wall))
         {
-            // The function findPlaceToStopFutureWall does not reset the neighbors of the problematic wall, 
+            // The function findPlaceToStopFutureWall does not reset the neighbors of the problematic wall 
             wall.resetNeighbors(bestRow, bestCol);
             //return false because a decision has not been made. Only a virtual wall was placed
             return false;
@@ -523,50 +555,48 @@ public class AI extends Player
             // we either reach this when there was no wall that could block the weak spot, or when a new wall
             // that is problematic was found
             // if there was an attempt to find a wall but it was not successful, go to the alternate path
-            ArrayList<Cell> alternatePath = BFS(this.place.getMoveOptions(), this, null);
-            // If the variable wall does not equal to the wall that was virtually placed
+            // In order to find the alternate path - first delete the neighbors of the problematic wall
+            wall.deleteNeighbors(bestRow, bestCol);
             if (!this.wallBlockingWeakSpot.equals(""))
             {
-                // a wall has already been placed and there is another problematic wall
+                // a wall has already been placed, but now there is another problematic wall
                 // If so, we must also go to the alternate path, but first we have to retreive the blocking wall
-                // from the property of the AI
-                wall = (this.wallBlockingWeakSpot.charAt(0) == 'H') ? new HorizontalWall(board) : new VerticalWall(board);
-                bestRow = Integer.parseInt(this.wallBlockingWeakSpot.substring(1, 3));
-                bestCol = Integer.parseInt(this.wallBlockingWeakSpot.substring(3, 5));
+                // from the property of the AI, and reset its neighbors
+                Wall blockingWall = (this.wallBlockingWeakSpot.charAt(0) == 'H') ? new HorizontalWall(board) : new VerticalWall(board);
+                int blockingRow = Integer.parseInt(this.wallBlockingWeakSpot.substring(1, 3));
+                int blockingCol = Integer.parseInt(this.wallBlockingWeakSpot.substring(3, 5));
+                blockingWall.resetNeighbors(blockingRow, blockingCol);
             }
+            // find the current alternate path
+            ArrayList<Cell> alternatePath = BFS(this.place.getMoveOptions(), this, null);
             wall.resetNeighbors(bestRow, bestCol);
             board.endTurn(alternatePath.get(1), false);
             // a move has been made, so return true
             return true;
-        }
+        }    
     }
-
-    // This function virtually places the wall that blocks the current weak spot and checks if there is anything to do
-    // in order to prevent it
-    // If it finds such wall, it returns true, and places the wall's info in the property: wallBlocking
-    private boolean findPlaceToStopFutureWall(int bestRow, int bestCol, Wall wall)
+       
+    /* This function virtually places the wall that blocks the current weak spot and checks if there is anything to do
+       in order to prevent it
+       If it finds such wall, it returns true, and places the wall's info in the property: wallBlocking */
+    private boolean findPlaceToStopFutureWall(int bestRow, int bestCol, Wall wall) 
     {
         // virtually delete the neighbors of the wall in question
         wall.deleteNeighbors(bestRow, bestCol);
 
         ArrayList<Cell> alternatePath = BFS(this.place.getMoveOptions(), this, null);
-        System.out.println("BLOCKING OPPONENT");
-        int row = alternatePath.get(0).getRow();
-        int col = alternatePath.get(0).getCol();
         int wallRow = -1, wallCol = -1;
-        // neighborIndex - the direction of the shortest path
-        // pathIndex - the cell in the path we are currently trying to block
         int pathIndex = 0, neighborIndex;
         Wall blockingWall;
         boolean triedBothOptions = false, wallNotFound = true;
         neighborIndex = determineDirectionOfFirstMove(pathIndex, alternatePath, this.place.getMoveOptions());
-        Pair<Wall, Pair<Integer, Integer>> coordinate = determineRowAndColOfWall(row, col, neighborIndex);
+        Pair<Wall, Pair<Integer, Integer>> coordinate = determineRowAndColOfWall(alternatePath.get(0).getRow(), alternatePath.get(0).getCol(), neighborIndex);
         blockingWall = coordinate.getKey();
-        row = coordinate.getValue().getKey();
-        col = coordinate.getValue().getValue();
-        Point p = new Point(col * 60, row * 60);
+        int row = coordinate.getValue().getKey();
+        int col = coordinate.getValue().getValue();
         while (pathIndex < alternatePath.size() - 1 && wallNotFound)
         {
+            Point p = new Point(col * Cell.CELL_WIDTH, row * Cell.CELL_WIDTH);
             // check if the wall proposed is an okay wall...
             if (blockingWall.isLocationValid(p) && !blockingWall.checkIntersections(row, col))
                 if (blockingWall.isPlayerBlocked(row, col))
@@ -588,7 +618,6 @@ public class AI extends Player
                     row--;
                 else
                     col--;
-                p = new Point(col * 60, row * 60);
                 triedBothOptions = true;
             } else
             {
@@ -596,13 +625,10 @@ public class AI extends Player
                 if (pathIndex < alternatePath.size() - 1 && wallNotFound)
                 {
                     neighborIndex = determineDirection(pathIndex, alternatePath);
-                    row = alternatePath.get(pathIndex).getRow();
-                    col = alternatePath.get(pathIndex).getCol();
-                    coordinate = determineRowAndColOfWall(row, col, neighborIndex);
+                    coordinate = determineRowAndColOfWall(alternatePath.get(pathIndex).getRow(), alternatePath.get(pathIndex).getCol(), neighborIndex);
                     blockingWall = coordinate.getKey();
                     row = coordinate.getValue().getKey();
                     col = coordinate.getValue().getValue();
-                    p = new Point(col * 60, row * 60);
                     triedBothOptions = false;
                 }
             }

@@ -41,7 +41,18 @@ public abstract class Wall extends JButton implements MouseListener, MouseMotion
     
     public abstract boolean isLocationValid(Point p);
     public abstract boolean checkIntersections(int row, int col);
-    public abstract boolean isPlayerBlocked(int row, int col);
+    public boolean isPlayerBlocked(int row, int col)
+    {
+        boolean blocked = false;
+        deleteNeighbors(row, col);
+        for (Logic.Player player : board.players)
+        {
+            if (Logic.AI.BFS(player.place.getMoveOptions(), player, null) == null)
+                blocked = true;
+        }
+        resetNeighbors(row, col);
+        return blocked;
+    }
     public abstract void placeWall(int row, int col);
     public abstract void resetNeighbors(int row, int col);
     public abstract void deleteNeighbors(int row, int col);
@@ -53,12 +64,12 @@ public abstract class Wall extends JButton implements MouseListener, MouseMotion
     public boolean locationBetweenBoards(int coordinate)
     {
         // Is the current coordinate between two cells
-        if (coordinate % 60 < 45 && coordinate % 60 > 15)
+        if (coordinate % Cell.CELL_WIDTH < 45 && coordinate % Cell.CELL_WIDTH > 15)
             return false;
         if (coordinate < 0)
             return false;
         // The coordinate is not in the board
-        if (coordinate > (board.BSize - 1)*60)
+        if (coordinate > (board.BSize - 1)*Cell.CELL_WIDTH)
             return false;
         return true;
     }

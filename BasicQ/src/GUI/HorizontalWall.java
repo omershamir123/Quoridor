@@ -33,7 +33,7 @@ public class HorizontalWall extends Wall
     @Override
     public boolean isLocationValid(Point p)
     {
-        return locationBetweenBoards(p.x) && locationBetweenBoards(p.y) && p.y >= 45 && p.x < (board.BSize-1)*60;
+        return locationBetweenBoards(p.x) && locationBetweenBoards(p.y) && p.y >= 45 && p.x < (board.BSize-1)*Cell.CELL_WIDTH;
     }
     
     /**
@@ -48,30 +48,17 @@ public class HorizontalWall extends Wall
         if (row == board.BSize - 1 && col == board.BSize - 1)
             return true;
         // same intersection exists
-        if (!board.HorizontalIntersections.contains(new Pair(row, col+1)) || !board.VerticalIntersections.contains(new Pair(row, col+1)))
+        if (board.HorizontalIntersections.contains(new Pair(row, col+1)) || board.VerticalIntersections.contains(new Pair(row, col+1)))
             return true;
         // intersection of the same wall type exists to the left of the currently attempted intersection
         // first make sure an intersection as such is even possible
-        if (row != 0 && col != 0 && !board.HorizontalIntersections.contains(new Pair(row, col)))
+        if (row != 0 && col != 0 && board.HorizontalIntersections.contains(new Pair(row, col)))
             return true;
         // intersection of the same wall type exists to the right of the currently attempted intersection
         // first make sure an intersection as such is even possible
-        if (col < board.BSize-2 && !board.HorizontalIntersections.contains(new Pair(row, col+2)))
+        if (col < board.BSize-2 && board.HorizontalIntersections.contains(new Pair(row, col+2)))
             return true;
         return false;
-    }
-    
-    public boolean isPlayerBlocked(int row, int col)
-    {
-        boolean blocked = false;
-        deleteNeighbors(row, col);
-        for (Logic.Player player : board.players)
-        {
-            if (Logic.AI.BFS(player.place.getMoveOptions(), player, null) == null)
-                blocked = true;
-        }
-        resetNeighbors(row, col);
-        return blocked;
     }
     
     /**
@@ -132,8 +119,8 @@ public class HorizontalWall extends Wall
             board.panel.info.setText("Wrong Placement");
             return;
         }
-         int row = Math.round((float)p.y/60);
-        int col = Math.round((float)p.x/60);
+         int row = Math.round((float)p.y/Cell.CELL_WIDTH);
+        int col = Math.round((float)p.x/Cell.CELL_WIDTH);
         // Check whether the placed wall intersects with another placed wall
         if (checkIntersections(row, col) || isPlayerBlocked(row, col))
         {
@@ -151,8 +138,8 @@ public class HorizontalWall extends Wall
     public void placeWall(int row, int col)
     {
         // Align the wall to its right place
-        this.setLocation(col*60 + 5, row*60 - 5);
-        board.HorizontalIntersections.remove(new Pair<>(row, col+1));
+        this.setLocation(col*Cell.CELL_WIDTH + 5, row*Cell.CELL_WIDTH - 5);
+        board.HorizontalIntersections.add(new Pair<>(row, col+1));
         // Make the neighbors of the current cell unclickable first, and then 
         // update the neighbors
         board.players[board.currentPlayer].place.SetOptionsForCurrentPlayer(false);

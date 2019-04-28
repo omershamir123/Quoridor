@@ -25,6 +25,7 @@ public class LogicBoard
     {
         TOP, BOTTOM, LEFT, RIGHT
     };
+
     // The gameboard 
     public GUI.Cell[][] cells;
     // The board panel
@@ -83,12 +84,12 @@ public class LogicBoard
         for (int i = 0; i < 2 * this.MaxWalls; i++)
         {
             VerticalWall vw = new VerticalWall(this);
-            vw.SetCoordinates(this.BSize * 60 + 75, (this.BSize / 2 - 1) * 60 + 25);
+            vw.SetCoordinates(this.BSize * Cell.CELL_WIDTH + 75, (this.BSize / 2 - 1) * Cell.CELL_WIDTH + 25);
             //vw.setSize(10, 110);
             panel.add(vw);
 
             HorizontalWall hw = new HorizontalWall(this);
-            hw.SetCoordinates(this.BSize * 60 + 25, (this.BSize / 2 - 1) * 60 + 5);
+            hw.SetCoordinates(this.BSize * Cell.CELL_WIDTH + 25, (this.BSize / 2 - 1) * Cell.CELL_WIDTH + 5);
             //hw.setSize(110, 10);
             panel.add(hw);
         }
@@ -99,7 +100,7 @@ public class LogicBoard
      */
     private void setCells()
     {
-        this.cells = new Cell[9][9];
+        this.cells = new Cell[this.BSize][this.BSize];
         for (int i = 0; i < BSize; i++)
         {
             for (int j = 0; j < BSize; j++)
@@ -119,7 +120,7 @@ public class LogicBoard
         // add for the right and bottom boundary only their bottom and right neighbors accrodingly
         for (int i = 0; i < this.BSize - 1; i++)
         {
-            cells[this.BSize - 1][i].addNeighbor(cells[this.BSize - 1][i + 1], Paths.RIGHT);
+            cells[this.BSize - 1][i].addNeighbor(cells[BSize - 1][i + 1], Paths.RIGHT);
             cells[i][this.BSize - 1].addNeighbor(cells[i + 1][BSize - 1], Paths.BOTTOM);
         }
     }
@@ -141,7 +142,7 @@ public class LogicBoard
             JLabel wallsInfo = new JLabel("Player "+player.playerNo+" walls Left: "+player.getWallsLeft());
             wallsInfo.setSize(500,30);
             wallsInfo.setFont(new Font("ComicSans", 1, 16));
-            wallsInfo.setLocation(10+(player.playerNo-1)*250, BSize * 60 + 15);
+            wallsInfo.setLocation(10+(player.playerNo-1)*250, BSize * Cell.CELL_WIDTH + 15);
             wallsInfo.setForeground(player.playerColor);
             panel.add(wallsInfo);
             player.setWallsInfo(wallsInfo);
@@ -154,14 +155,14 @@ public class LogicBoard
     {
         this.VerticalIntersections = new HashSet<>();
         this.HorizontalIntersections = new HashSet<>();
-        for (int i = 1; i < this.BSize; i++)
-        {
-            for (int j = 1; j <= this.BSize; j++)
-            {
-                this.VerticalIntersections.add(new Pair(i, j));
-                this.HorizontalIntersections.add(new Pair(i, j));
-            }
-        }
+//        for (int i = 1; i < this.BSize; i++)
+//        {
+//            for (int j = 1; j <= this.BSize; j++)
+//            {
+//                this.VerticalIntersections.add(new Pair(i, j));
+//                this.HorizontalIntersections.add(new Pair(i, j));
+//            }
+//        }
     }
 
     /**
